@@ -1,35 +1,91 @@
-const { MongoClient } = require("mongodb");
 const dbconfig = require('../dbconfig');
-const client = new MongoClient(dbconfig.altasUri);
+//const client = new MongoClient(dbconfig.altasUri);
+const mongoose = require('mongoose');
+const Tooltype = require('../models/Tooltype');
 
-const db = client.db("ohke_seminaari");
+//const db = client.db("ohke_seminaari");
+//const db = mongoose.connection;
 
-const getToolTypeByName = async (name) => {
+const getToolTypes = async (filter) => {
     try{
-        await client.connect();
-        const result = await db.collection("tool_types").findOne({name: name});
+        const connection = await mongoose.connect(dbconfig.altasUri);
+        const result = await Tooltype.find(filter);
         return result;
     }catch(error){
         return error;
-    }finally{
-        await client.close();
+    } finally{
+        await mongoose.connection.close();
     }
 }
 
 const addToolType = async (tooltype) => {
     try{
-        await client.connect();
-        const result = await db.collection("tool_types").insertOne(tooltype);
+        await mongoose.connect(dbconfig.altasUri);
+        const result = await Tooltype.create(tooltype);
+        return result;
+        // await client.connect();
+        // const result = await db.collection("tool_types").insertOne(tooltype);
+        // return result;
+    }catch(error){
+        return error;
+    }finally{
+        await mongoose.connection.close();
+    }
+}
+
+const updateById = async (id, tooltype) => {
+    try{
+        await mongoose.connect(dbconfig.altasUri);
+        const result = await Tooltype.findByIdAndUpdate(id, tooltype, {new: true});
         return result;
     }catch(error){
         return error;
     }finally{
-        await client.close();
+        await mongoose.connection.close();
+    }   
+}
+
+const updateByName = async (oldTooltype, newTooltype) =>{
+    const tooltypes = await getToolTypes({name: oldTooltype.name});
+
+    if(tooltypes.length > 0){
+        const tooltype = tooltypes[0];
+        const result = await updateById(tooltype._id, newTooltype);
+        return result;
+    }else{
+        return {code: 404};
     }
 }
 
+const removeById = async (id) => {
+    try{
+        await mongoose.connect(dbconfig.altasUri);
+        const result = await Tooltype.findByIdAndRemove(id);
+        return result;
+    }catch(error){
+        return error;
+    }finally{
+        await mongoose.connection.close();
+    }
+}
+
+const removeByName = async (name) => {
+    const tooltypes = await getToolTypes({name: name});
+
+    if(tooltypes.length > 0){
+        const id = tooltypes[0]._id;
+        const result = await removeById(id);
+        return result
+    }
+
+    return {code: 404};
+}
+
 exports.addToolType = addToolType;
-exports.getToolTypeByName = getToolTypeByName;
+exports.getToolTypes = getToolTypes;
+exports.updateByName = updateByName;
+exports.updateById = updateById;
+exports.removeByName = removeByName;
 
 //const listDatabases = async (client) => {
     // const dbList = await client.db().admin().listDatabases();

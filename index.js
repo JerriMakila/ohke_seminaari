@@ -1,11 +1,15 @@
 const express = require('express');
-const db = require('./database/db');
-const app = express();
+const db = require('./database/db_tooltypes');
+const tooltypes = require('./routes/tooltypes');
+const locations = require('./routes/locations');
 const PORT = process.env.PORT || 3000;
+const app = express();
 
 app.use(express.json());
+app.use('/locations', locations);
+app.use('/tooltypes', tooltypes);
 
-app.get('/tooltype/', async function (req, res){
+/*app.get('/tooltypes/', async function (req, res){
     const name = req.query.name;
     const result = await db.getToolTypeByName(name);
 
@@ -29,7 +33,7 @@ app.post('/tooltypes', async function (req, res){
     }
     
     return res.status(400).json(result);
-});
+});*/
 
 /*app.get('/tooltypes', async function (req, res){
     try{
