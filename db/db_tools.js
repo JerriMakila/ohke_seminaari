@@ -34,7 +34,7 @@ const updateById = async (id, tool) => {
     }catch(error){
         return error;
     }finally{
-        await mongoose.connect(dbconfig.altasUri);
+        await mongoose.connection.close();
     }
 }
 
