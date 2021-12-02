@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../database/db_tooltypes');
+const db = require('../db/db_tooltypes');
 let router = express.Router();
 
 router

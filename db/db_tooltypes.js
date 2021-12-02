@@ -8,7 +8,7 @@ const Tooltype = require('../models/Tooltype');
 
 const getToolTypes = async (filter) => {
     try{
-        const connection = await mongoose.connect(dbconfig.altasUri);
+        await mongoose.connect(dbconfig.altasUri);
         const result = await Tooltype.find(filter);
         return result;
     }catch(error){

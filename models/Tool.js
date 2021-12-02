@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
-const Profile = new mongoose.Schema({
-    name: {type:String, trim:true, required:true},
+const Tool = new mongoose.Schema({
+    name: {type:String, trim:true, required:true, index: {unique: true}},
     tooltype: {type:String, trim:true, required:true}
 });
 
-module.exports = mongoose.model('Profile', Profile);
+module.exports = mongoose.model('Tool', Tool);
