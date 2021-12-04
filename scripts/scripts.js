@@ -1,3 +1,4 @@
+//Uses MongoDB-document to create js-object
 const toObject = (document) => {
     let newObject = {};
 

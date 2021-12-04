@@ -1,14 +1,11 @@
 const dbconfig = require('../dbconfig');
-//const client = new MongoClient(dbconfig.altasUri);
 const mongoose = require('mongoose');
 const Tooltype = require('../models/Tooltype');
+const ATLAS_URI = process.env.ATLAS_URI || dbconfig.altasUri
 
-//const db = client.db("ohke_seminaari");
-//const db = mongoose.connection;
-
-const getToolTypes = async (filter) => {
+const getToolTypes = async (filter) => {//Gets all the documents that match the filter. If no filter is given, fetches every document from the collection
     try{
-        await mongoose.connect(dbconfig.altasUri);
+        await mongoose.connect(ATLAS_URI);
         const result = await Tooltype.find(filter);
         return result;
     }catch(error){
@@ -18,14 +15,11 @@ const getToolTypes = async (filter) => {
     }
 }
 
-const addToolType = async (tooltype) => {
+const addToolType = async (tooltype) => {//Adds a document to the collection
     try{
-        await mongoose.connect(dbconfig.altasUri);
+        await mongoose.connect(ATLAS_URI);
         const result = await Tooltype.create(tooltype);
         return result;
-        // await client.connect();
-        // const result = await db.collection("tool_types").insertOne(tooltype);
-        // return result;
     }catch(error){
         return error;
     }finally{
@@ -33,9 +27,9 @@ const addToolType = async (tooltype) => {
     }
 }
 
-const updateById = async (id, tooltype) => {
+const updateById = async (id, tooltype) => {//Updates a document by it's ID
     try{
-        await mongoose.connect(dbconfig.altasUri);
+        await mongoose.connect(ATLAS_URI);
         const result = await Tooltype.findByIdAndUpdate(id, tooltype, {new: true});
         return result;
     }catch(error){
@@ -45,21 +39,21 @@ const updateById = async (id, tooltype) => {
     }   
 }
 
-const updateByName = async (oldTooltype, newTooltype) =>{
-    const tooltypes = await getToolTypes({name: oldTooltype.name});
+const updateByName = async (oldTooltype, newTooltype) =>{//Updates a document by it's name. Names in this collection are unique
+    const tooltypes = await getToolTypes({name: oldTooltype.name});//Fetches the right document using the name as a filter, returns an array
 
-    if(tooltypes.length > 0){
+    if(tooltypes.length > 0){//If document with the given name does not exist in the collection, the array is empty
         const tooltype = tooltypes[0];
-        const result = await updateById(tooltype._id, newTooltype);
+        const result = await updateById(tooltype._id, newTooltype);//Uses the documents id to update the document
         return result;
     }else{
-        return {code: 404};
+        return {code: 404};// If the document does not exist, returns code 404
     }
 }
 
-const removeById = async (id) => {
+const removeById = async (id) => {//Removes a document by it's id
     try{
-        await mongoose.connect(dbconfig.altasUri);
+        await mongoose.connect(ATLAS_URI);
         const result = await Tooltype.findByIdAndRemove(id);
         return result;
     }catch(error){
@@ -69,16 +63,16 @@ const removeById = async (id) => {
     }
 }
 
-const removeByName = async (name) => {
-    const tooltypes = await getToolTypes({name: name});
+const removeByName = async (name) => {//Removes a document by it's name. Names in this collection are unique
+    const tooltypes = await getToolTypes({name: name});//Fetches the right document using the name as a filter, returns an array
 
-    if(tooltypes.length > 0){
+    if(tooltypes.length > 0){//If document with the given name does not exist in the collection, the array is empty
         const id = tooltypes[0]._id;
-        const result = await removeById(id);
+        const result = await removeById(id);//Uses the documents id to remove the document
         return result
     }
 
-    return {code: 404};
+    return {code: 404};// If the document does not exist, returns code 404
 }
 
 exports.addToolType = addToolType;
@@ -86,92 +80,3 @@ exports.getToolTypes = getToolTypes;
 exports.updateByName = updateByName;
 exports.updateById = updateById;
 exports.removeByName = removeByName;
-
-//const listDatabases = async (client) => {
-    // const dbList = await client.db().admin().listDatabases();
-    // return dbList.databases;
-    // console.log("Databases:");
-    // dbList.databases.forEach(db => {
-    //     console.log(`- ${db.name}`);
-    // });
-
-    //const dbList = await client.db("sample_airbnb").collection("listingsAndReviews").findAll();
-    //return dbList;
-//}
-
-/*const findMultipleListings = async (client, {
-    minimumNumberOfBedrooms = 0,
-    minimumNumberOfBathrooms = 0,
-    maximumNumberOfResults = Number.MAX_SAFE_INTEGER
-} = {}) =>{
-    const cursor = await client.db("sample_airbnb").collection("listingsAndReviews").find({
-        bedrooms: { $gte: minimumNumberOfBedrooms },
-        bathrooms: { $gte: minimumNumberOfBathrooms }
-    }).sort({ last_review: -1 })
-    .limit(maximumNumberOfResults);
-
-    const result = await cursor.toArray();
-
-    return result;
-}*/
-
-// const findMultipleListings = async (client) => {
-//     const cursor = await client.db("sample_airbnb").collection("listingsAndReviews").find()
-//         .limit(5);
-
-//     const result = await cursor.toArray();
-//     return result;
-// }
-
-// const findOneListingByName = async(client, name) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").findOne({name: name});
-//     return result;
-// }
-
-// const createListing = async (client, newListing) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertOne(newListing);
-//     return result;
-// }
-
-// const createMultipleListings = async (client, newListings) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").insertMany(newListings);
-//     return result;
-// }
-
-// const updateListingByName = async (client, nameofListing, updatedListing) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").updateOne({ name: nameofListing }, {$set: updatedListing})
-//     return result;
-// }
-
-// const upsertListingByName = async (client, nameofListing, updatedListing) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").updateOne({ name: nameofListing }, {$set: updatedListing}, {upsert: true})
-//     return result;
-// }
-
-// const updateAllListingsToHavePropertyType = async (client) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").updateMany({property_type: { $exists: false }},
-//         {$set: {property_type: "Unknown"}});
-
-//     return result;
-// }
-
-// const deleteListingByName = async (client, nameOfListing) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").deleteOne({name: nameOfListing});
-//     return result;
-// }
-
-// const deleteListingsScrapedBeforeDate = async (client, date) => {
-//     const result = await client.db("sample_airbnb").collection("listingsAndReviews").deleteMany({last_scraped: { $lt: date }});
-//     return result;
-// }
-
-// module.exports = {
-//     createListing,
-//     createMultipleListings,
-//     findOneListingByName,
-//     findMultipleListings,
-//     updateListingByName,
-//     upsertListingByName,
-//     updateAllListingsToHavePropertyType,
-//     deleteListingByName,
-//     deleteListingsScrapedBeforeDate };

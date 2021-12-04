@@ -15,11 +15,11 @@ router
             const tooltype = req.body;
             const result = await db.addToolType(tooltype);
 
-            if(result._id){
+            if(result._id){//If adding was succesful, the result has key '_id' in it
                 return res.status(200).json(result);
             }
 
-            if(result.code && result.code === 11000){
+            if(result.code && result.code === 11000){ //Code for a duplicate value in a field that should be unique
                 return res.status(400).json({message: "Tooltype with the given name already exists"});
             }
 
@@ -31,26 +31,26 @@ router
             const oldTooltype = req.body.old;
             const newTooltype = req.body.new;
 
-            if(!oldTooltype.id && !oldTooltype.name){
+            if(!oldTooltype.id && !oldTooltype.name){//Either name or id of the document is needed in order to update it
                 return res.status(400).json({message: "Tooltype must have either name or id specified"});
             }
 
             let result;
 
-            if(!oldTooltype.id){
+            if(!oldTooltype.id){//If id is not present, document will be updated by it's name
                 result = await db.updateByName(oldTooltype, newTooltype);
             }else{
                 result = await db.updateById(oldTooltype.id, newTooltype);
             }
 
-            if(result.code){
+            if(result.code){//If result has key 'code' in it, something has gone wrong
                 let message;
 
                 switch(result.code){
-                    case 11000:
+                    case 11000://Code for a duplicate value in a field that should be unique
                         message = `Tooltype with the name '${newTooltype.name}' already exists`
                         break;
-                    case 404:
+                    case 404://Document not found in the collection
                         message = `Tooltype with the name '${oldTooltype.name}' was not found`;
                         break;
                     default:
@@ -70,7 +70,7 @@ router
             const result = await db.removeByName(name);
 
             if(result.code){
-                if(result.code === 404){
+                if(result.code === 404){//Document not found in the collection
                     return res.status(404).json({message: `Tooltype with the name '${name}' not found`});  
                 }
 
